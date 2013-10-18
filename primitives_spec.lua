@@ -35,4 +35,4 @@ vector_spec = umf.ObjectSpec{
    },
 }
 
-return primitive_spec
+return point_spec
