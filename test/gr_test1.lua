@@ -3,21 +3,44 @@ local gr_spec =require "gr_spec"
 
 
 
-x1 = gr_spec.Point{a=1,b=2,c=3}
-umf.check(x1,gr_spec.point_spec,true)
-x2 = gr_spec.Line{x=1,y=2,z=3}
+point = gr_spec.Point{x=1,y=2,z=3}
+versor = gr_spec.Point{x=0,y=0,z=1}
 
-pr1 = gr_spec.Primitive{entity=x1}
-pr2 = gr_spec.Primitive{entity=x2}
-umf.check(pr1,gr_spec.primitive_spec,true)
-umf.check(pr2,gr_spec.primitive_spec,true)
+line = gr_spec.Line{origin=gr_spec.Point{x=0,y=0,z=0},direction=gr_spec.Versor{x=1,y=0,z=0}}
+plane = gr_spec.Plane{origin=gr_spec.Point{x=0,y=0,z=0},normal=gr_spec.Versor{x=1,y=0,z=0}}
 
-g1 = gr_spec.Geo_Relation{p1=pr1,p2=pr1,relation_type=	"point-point distance"}
-g2 = gr_spec.Geo_Relation{p1=pr1,p2=pr2,relation_type=	"line-point distance"}
-g3 = gr_spec.Geo_Relation{p1=pr2,p2=pr1,relation_type=	"line-point distance"}
-g4 = gr_spec.Geo_Relation{p1=pr1,p2=pr1,relation_type=	"line-point distance"}
-umf.check(g1,gr_spec.geo_relation_spec,true)
-umf.check(g2,gr_spec.geo_relation_spec,true)
-umf.check(g3,gr_spec.geo_relation_spec,true)
-print("g4 check")
-umf.check(g4,gr_spec.geo_relation_spec,true)
+
+o1=gr_spec.ObjectFrame{frame_name="o1"}
+o2=gr_spec.ObjectFrame{frame_name="o2"}
+
+pr_line = gr_spec.Primitive{entity=line,base_frame=o1}
+pr_point = gr_spec.Primitive{entity=point,base_frame=o1}
+pr_plane = gr_spec.Primitive{entity=plane,base_frame=o2}
+pr_versor = gr_spec.Primitive{entity=versor,base_frame=o2}
+
+
+g1 = gr_spec.GeometricRelation{p1=pr_point,p2=pr_point,relation_type=	"point-point distance"}
+g2 = gr_spec.GeometricRelation{p1=pr_point,p2=pr_line,relation_type=	"line-point distance"}
+g3 = gr_spec.GeometricRelation{p1=pr_line,p2=pr_line,relation_type=	"line-point distance"}
+g4 = gr_spec.GeometricRelation{p1=pr_point,p2=pr_point,relation_type=	"line-point distance"}
+g5 = gr_spec.GeometricRelation{p1=pr_line,p2=pr_line,relation_type=	"distance from lines"}
+g6 = gr_spec.GeometricRelation{p1=pr_plane,p2=pr_line,relation_type=	"distance from lines"}
+
+umf.check(g4,gr_spec.geometric_relation_spec,true)
+
+j1 = gr_spec.JointRelation{joint_names={"j1"},relation_type="single_joint_value"}
+
+umf.check(j1,gr_spec.joint_relation_spec,true)
+
+
+print("======\nconstraints..\n==========")
+
+umf.check(gr_spec.Constraint{relation=g1},gr_spec.constraint_spec,true)
+umf.check(gr_spec.Constraint{relation=g2},gr_spec.constraint_spec,true)
+umf.check(gr_spec.Constraint{relation=g3},gr_spec.constraint_spec,true)
+umf.check(gr_spec.Constraint{relation=g4},gr_spec.constraint_spec,true)
+umf.check(gr_spec.Constraint{relation=g5},gr_spec.constraint_spec,true)
+umf.check(gr_spec.Constraint{relation=g6},gr_spec.constraint_spec,true)
+
+
+
