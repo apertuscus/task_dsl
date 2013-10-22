@@ -34,10 +34,10 @@ end
 
 
 function check_legal_pairs(obj)
-relation=obj.relation_type
+relation=obj.relation
 tab=geometric_relation_entity_legal_association
-print(relation)
-print(tab[relation])
+--print(relation)
+--print(tab[relation])
 if (umf.instance_of(tab[relation][1] ,obj.p1.entity) 
 	and  umf.instance_of(tab[relation][2] ,obj.p2.entity))
 	or
@@ -110,11 +110,12 @@ plane_spec = umf.ObjectSpec{
        normal=versor_spec,
   },
 }
-function check_inheritance(obj,spec_table)
+function check_inheritance(obj,spec_table,vres)
+
 for c,f_spec in pairs (spec_table) 
    do
    		if  umf.instance_of(c, obj) then
-   		print("found")
+   		--print("found")
    	 	return  f_spec:check(obj, vres)
       	end
    end
@@ -142,7 +143,7 @@ function EntitySpec.check(self, obj, vres)
       umf.ind_dec()
       return false
    end
-   ret=check_inheritance (obj,entity_spec_table)
+   ret=check_inheritance (obj,entity_spec_table,vres)
    if ret==nil 
    then
    		umf.add_msg(vres, "err", "expected Point, Versor,Line, Plane, got:"..tostring(obj:class()))
@@ -205,42 +206,34 @@ primitive_spec = umf.ObjectSpec{
 }
 	
 
-function geometric_relation_type_check (self, obj, vres)
- 	umf.log("validating object against geometric_relation_type_check")
-	umf.add_msg(vres, "inf", obj.relation_type .. ", passed " 
+function geometric_equation_type_check (self, obj, vres)
+ 	umf.log("validating object against geometric_equation_type_check")
+	umf.add_msg(vres, "inf", obj.relation .. ", passed " 
    		.. tostring(obj.p1.entity:class()) 
    		.." and ".. tostring(obj.p2.entity:class()) )  	
    	
    	if not check_legal_pairs(obj)
-   	 then umf.add_msg(vres, "err", obj.relation_type .. " needs two points, passed " 
-   		.. tostring(obj.p1.entity:class()) 
-   		.." and ".. tostring(obj.p2.entity:class()) )
+   	 then umf.add_msg(vres, "err", obj.relation .. " needs: "  
+   		.. tostring(geometric_relation_entity_legal_association[obj.relation][1]) 
+   		.." and "
+   		.. tostring(geometric_relation_entity_legal_association[obj.relation][2] ))
    		return false
    		else return true
    	end
     
 end
 
---[[
-function dummy_check (self, obj, vres)
- 	umf.log("dummy_check")
-	umf.add_msg(vres, "inf", obj.relation_type .. ",dummy passed " 
-   		.. tostring(obj.p1.entity:class()) 
-   		.." and "
-   		.. tostring(obj.p2.entity:class()))
-   		return true
-end
---]]
-GeometricRelation=umf.class("GeometricRelation")
-geometric_relation_spec = umf.ObjectSpec{
-  name='geometric_relation',
-  postcheck=geometric_relation_type_check,
-  type=GeometricRelation,
+
+GeometricExpression=umf.class("GeometricExpression")
+geometric_expression_spec = umf.ObjectSpec{
+  name='geometric_expression',
+  postcheck=geometric_equation_type_check,
+  type=GeometricExpression,
   sealed='both',
   dict={
 	p1=primitive_spec,	
 	p2=primitive_spec,
-	relation_type=geometric_relation_type_spec
+	relation=geometric_relation_type_spec
   },
 }
 string_array_spec = umf.TableSpec {
@@ -248,76 +241,51 @@ string_array_spec = umf.TableSpec {
    sealed='both',
    array={ umf.StringSpec{} }
 }
-JointRelation=umf.class("JointRelation")
-joint_relation_spec = umf.ObjectSpec{
-  name='joint_relation',
-  --postcheck=joint_relation_type_check,
-  type=JointRelation,
+JointExpression=umf.class("JointExpression")
+
+joint_expression_spec = umf.ObjectSpec{
+  name='joint_expression',
+  --postcheck=...
+  type=JointExpression,
   sealed='both',
   dict={
 	joint_names=string_array_spec,
-	relation_type=joint_relation_type_spec
+	relation=joint_relation_type_spec
   },
 }
 
-RelationSpec = umf.class("RelationSpec", umf.Spec)
+ExpressionSpec = umf.class("ExpressionSpec", umf.Spec)
 
 -- Relation are Joint or geometrical
---[[
+
 relation_spec_table={
-	[JointRelation]=joint_relation_spec,
-	[GeometricRelation]=geometric_relation_spec,
+	[JointExpression]=joint_expression_spec,
+	[GeometricExpression]=geometric_expression_spec,
 	}
 
 
 
-function RelationSpec.check(self, obj, vres)
+function ExpressionSpec.check(self, obj, vres)
    local ret = true
     umf.ind_inc()--increment an index, defined in umf.lua
 
-    umf.add_msg(vres, "inf", ",RelationSpec.check on "..tostring(obj:class()))
-    umf.log("validating object against RelationSpec")
+    umf.add_msg(vres, "inf", ",ExpressionSpec.check on "..tostring(obj:class()))
+    umf.log("validating object against ExpressionSpec")
    if not umf.uoo_type(obj) then
       umf.add_msg(vres, "err", tostring(obj) .. " not an UMF object")
       umf.ind_dec()
       return false
    end
-   ret=check_inheritance (obj,relation_spec_table)
+   ret=check_inheritance (obj,relation_spec_table,vres)
   
    if ret==nil 
    then
    		umf.add_msg(vres, "err", "Joint or Geometric relation, got:"..tostring(obj:class()))
-    	retu=false
+    	ret=false
    end
-   umf.ind_dec()--decrement an index, defined in umf.lua
-   print("qui RelationSpec e' " ..tostring(retu))
-   return ret
-end
-]]
-
-function RelationSpec.check(self, obj, vres)
-   local ret = true
-   umf.ind_inc()--increment an index, defined in umf.lua
-   umf.log("validating object against RelationSpec")
-   if not umf.uoo_type(obj) then
-      umf.add_msg(vres, "err", tostring(obj) .. " not an UMF object")
-      umf.ind_dec()
-      return false
-   end
-   
-   if  umf.instance_of(JointRelation, obj) then
-      ret = joint_relation_spec:check(obj, vres)
-   elseif umf.instance_of(GeometricRelation, obj) then
-      ret = geometric_relation_spec:check(obj, vres)
-   else
-      umf.add_msg(vres, "err", "expected Geometric or Joint relation, got:"..tostring(obj:class()))
-      ret=false
-   end
-
    umf.ind_dec()--decrement an index, defined in umf.lua
    return ret
 end
-
 
 --in case i want to add further specification in the future...
 behaviour_spec_table = { 
@@ -341,10 +309,25 @@ constraint_spec = umf.ObjectSpec{
   type=Constraint,
   sealed='both',
   dict={
-	relation=RelationSpec{},
+	output_equation=ExpressionSpec{},
 	behaviour=behaviour_type_spec,
 	tr_gen=umf.StringSpec{},
   },
   optional={"tr_gen"}
+}
+constraint_array_spec = umf.TableSpec {
+   name='string_array_spec',
+   sealed='both',
+   array={ constraint_spec }
+}
+Task=umf.class("Task")
+task_spec = umf.ObjectSpec{
+  name='task_spec',
+  --postcheck=joint_relation_type_check,
+  type=Task,
+  sealed='both',
+  dict={
+	emer_cstr=constraint_array_spec
+  },
 }
 
