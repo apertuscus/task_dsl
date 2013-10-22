@@ -110,7 +110,19 @@ plane_spec = umf.ObjectSpec{
        normal=versor_spec,
   },
 }
+function check_inheritance(obj,spec_table)
+for c,f_spec in pairs (spec_table) 
+   do
+   		if  umf.instance_of(c, obj) then
+   		print("found")
+   	 	return  f_spec:check(obj, vres)
+      	end
+   end
+   return nil
+end
+
 EntitySpec = umf.class("EntitySpec", umf.Spec)
+
 
 entity_spec_table={
 	[Point]=point_spec,
@@ -118,7 +130,29 @@ entity_spec_table={
 	[Line]=line_spec,
 	[Plane]=plane_spec}
 
+
+
 function EntitySpec.check(self, obj, vres)
+   local ret = true
+    umf.add_msg(vres, "inf", ",EntitySpec.check on "..tostring(obj:class()))
+     umf.ind_inc()--increment an index, defined in umf.lua
+   umf.log("validating object against EntitySpec")
+   if not umf.uoo_type(obj) then
+      umf.add_msg(vres, "err", tostring(obj) .. " not an UMF object")
+      umf.ind_dec()
+      return false
+   end
+   ret=check_inheritance (obj,entity_spec_table)
+   if ret==nil 
+   then
+   		umf.add_msg(vres, "err", "expected Point, Versor,Line, Plane, got:"..tostring(obj:class()))
+    	ret=false
+   end
+   umf.ind_dec()--decrement an index, defined in umf.lua
+   return ret
+end
+
+--[[function EntitySpec.check(self, obj, vres)
    local ret = true
     umf.add_msg(vres, "inf", ",EntitySpec.check on "..tostring(obj:class()))
      umf.ind_inc()--increment an index, defined in umf.lua
@@ -144,7 +178,7 @@ function EntitySpec.check(self, obj, vres)
    umf.ind_dec()--decrement an index, defined in umf.lua
    return ret
 end
-
+]]
 
 
 
@@ -229,6 +263,38 @@ joint_relation_spec = umf.ObjectSpec{
 RelationSpec = umf.class("RelationSpec", umf.Spec)
 
 -- Relation are Joint or geometrical
+--[[
+relation_spec_table={
+	[JointRelation]=joint_relation_spec,
+	[GeometricRelation]=geometric_relation_spec,
+	}
+
+
+
+function RelationSpec.check(self, obj, vres)
+   local ret = true
+    umf.ind_inc()--increment an index, defined in umf.lua
+
+    umf.add_msg(vres, "inf", ",RelationSpec.check on "..tostring(obj:class()))
+    umf.log("validating object against RelationSpec")
+   if not umf.uoo_type(obj) then
+      umf.add_msg(vres, "err", tostring(obj) .. " not an UMF object")
+      umf.ind_dec()
+      return false
+   end
+   ret=check_inheritance (obj,relation_spec_table)
+  
+   if ret==nil 
+   then
+   		umf.add_msg(vres, "err", "Joint or Geometric relation, got:"..tostring(obj:class()))
+    	retu=false
+   end
+   umf.ind_dec()--decrement an index, defined in umf.lua
+   print("qui RelationSpec e' " ..tostring(retu))
+   return ret
+end
+]]
+
 function RelationSpec.check(self, obj, vres)
    local ret = true
    umf.ind_inc()--increment an index, defined in umf.lua
@@ -251,6 +317,23 @@ function RelationSpec.check(self, obj, vres)
    umf.ind_dec()--decrement an index, defined in umf.lua
    return ret
 end
+
+
+--in case i want to add further specification in the future...
+behaviour_spec_table = { 
+	["Positioning"]={},
+	["Move Toward"]={},
+	["Interaction"]={},
+	["Compliant"]={},
+	["Position Limit"]={},
+	["Velocity Limit"]={}
+	}
+behaviour_type_spec = umf.EnumSpec{} 	
+for k ,v in pairs(behaviour_spec_table) 
+	do table.insert(behaviour_type_spec,k) 
+end 	
+
+
 Constraint=umf.class("Constraint")
 constraint_spec = umf.ObjectSpec{
   name='constraint_spec',
@@ -259,6 +342,9 @@ constraint_spec = umf.ObjectSpec{
   sealed='both',
   dict={
 	relation=RelationSpec{},
+	behaviour=behaviour_type_spec,
+	tr_gen=umf.StringSpec{},
   },
+  optional={"tr_gen"}
 }
 

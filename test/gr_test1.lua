@@ -30,17 +30,23 @@ umf.check(g4,gr_spec.geometric_relation_spec,true)
 
 j1 = gr_spec.JointRelation{joint_names={"j1"},relation_type="single_joint_value"}
 
-umf.check(j1,gr_spec.joint_relation_spec,true)
 
 
+
+print("======\relation..\n==========")
+
+umf.check(g1,gr_spec.RelationSpec{},true)
 print("======\nconstraints..\n==========")
-
-umf.check(gr_spec.Constraint{relation=g1},gr_spec.constraint_spec,true)
-umf.check(gr_spec.Constraint{relation=g2},gr_spec.constraint_spec,true)
-umf.check(gr_spec.Constraint{relation=g3},gr_spec.constraint_spec,true)
-umf.check(gr_spec.Constraint{relation=g4},gr_spec.constraint_spec,true)
-umf.check(gr_spec.Constraint{relation=g5},gr_spec.constraint_spec,true)
-umf.check(gr_spec.Constraint{relation=g6},gr_spec.constraint_spec,true)
-
-
+umf.check(gr_spec.Constraint{relation=g2,behaviour="Velocity Limit"},gr_spec.constraint_spec,true)
+print("======\n  1\n==========")
+umf.check(gr_spec.Constraint{relation=g3,behaviour="Velocity Limit"},gr_spec.constraint_spec,true)
+print("======\n  2\n==========")
+umf.check(gr_spec.Constraint{relation=g4,behaviour="Velocity Limit"},gr_spec.constraint_spec,true)
+print("======\n  3\n==========")
+umf.check(gr_spec.Constraint{relation=g5,behaviour="Velocity Limit"},gr_spec.constraint_spec,true)
+print("======\n  4\n==========")umf.check(gr_spec.Constraint{relation=g6,behaviour="Velocity Limit"},gr_spec.constraint_spec,true)
+umf.check(gr_spec.Constraint{relation=j1,behaviour="Velocity Limit"},gr_spec.constraint_spec,true)
+print("======\n  5\n==========")
+c1=gr_spec.Constraint{relation=g1,behaviour="Velocity Limit"}
+umf.check(c1,gr_spec.constraint_spec,true)
 
