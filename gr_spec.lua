@@ -78,7 +78,9 @@ function versor_unitary_mod_check (self, obj, vres)
    	if math.abs(modl -1)>10^-6 then
    		umf.add_msg(vres, "err", "versor needs unitary modulus vectors!\n"..
    		"Mod="..tostring(modl))
+   		return false
    	end
+   	return true
 end
 
 versor_spec = umf.ObjectSpec{
