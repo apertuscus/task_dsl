@@ -119,7 +119,7 @@ for c,f_spec in pairs (spec_table)
    	 	return  f_spec:check(obj, vres)
       	end
    end
-   return nil
+   return false
 end
 
 EntitySpec = umf.class("EntitySpec", umf.Spec)
@@ -144,7 +144,7 @@ function EntitySpec.check(self, obj, vres)
       return false
    end
    ret=check_inheritance (obj,entity_spec_table,vres)
-   if ret==nil 
+   if not ret 
    then
    		umf.add_msg(vres, "err", "expected Point, Versor,Line, Plane, got:"..tostring(obj:class()))
     	ret=false
@@ -152,35 +152,6 @@ function EntitySpec.check(self, obj, vres)
    umf.ind_dec()--decrement an index, defined in umf.lua
    return ret
 end
-
---[[function EntitySpec.check(self, obj, vres)
-   local ret = true
-    umf.add_msg(vres, "inf", ",EntitySpec.check on "..tostring(obj:class()))
-     umf.ind_inc()--increment an index, defined in umf.lua
-   umf.log("validating object against EntitySpec")
-   if not umf.uoo_type(obj) then
-      umf.add_msg(vres, "err", tostring(obj) .. " not an UMF object")
-      umf.ind_dec()
-      return false
-   end
-   ret=false
-   for c,f_spec in pairs (entity_spec_table)
-   do
-    --umf.add_msg(vres, "inf", ",check on "..tostring(c))
-   	  if  umf.instance_of(c, obj) then
-   	  	umf.ind_dec()--decrement an index, defined in umf.lua 	   
-      	return  f_spec:check(obj, vres)
-      end
-   end
-  
-   umf.add_msg(vres, "err", "expected Point, Versor,Line, Plane, got:"..tostring(obj:class()))
-   ret=false
-
-   umf.ind_dec()--decrement an index, defined in umf.lua
-   return ret
-end
-]]
-
 
 
 ObjectFrame=umf.class("ObjectFrame")
@@ -278,7 +249,7 @@ function ExpressionSpec.check(self, obj, vres)
    end
    ret=check_inheritance (obj,relation_spec_table,vres)
   
-   if ret==nil 
+   if not ret
    then
    		umf.add_msg(vres, "err", "Joint or Geometric relation, got:"..tostring(obj:class()))
     	ret=false
