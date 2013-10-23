@@ -13,43 +13,43 @@ plane = gr_spec.Plane{origin=gr_spec.Point{x=0,y=0,z=0},normal=gr_spec.Versor{x=
 o1=gr_spec.ObjectFrame{frame_name="o1"}
 o2=gr_spec.ObjectFrame{frame_name="o2"}
 
-pr_line = gr_spec.Primitive{entity=line,base_frame=o1}
-pr_point = gr_spec.Primitive{entity=point,base_frame=o1}
-pr_plane = gr_spec.Primitive{entity=plane,base_frame=o2}
-pr_versor = gr_spec.Primitive{entity=versor,base_frame=o2}
+pr_line = gr_spec.Primitive{entity=line,object_frame=o1}
+pr_point = gr_spec.Primitive{entity=point,object_frame=o1}
+pr_plane = gr_spec.Primitive{entity=plane,object_frame=o2}
+pr_versor = gr_spec.Primitive{entity=versor,object_frame=o2}
 
 
-g1 = gr_spec.GeometricExpression{p1=pr_point,p2=pr_point,relation=	"point-point distance"}
-g2 = gr_spec.GeometricExpression{p1=pr_point,p2=pr_line,relation=	"line-point distance"}
-g3 = gr_spec.GeometricExpression{p1=pr_line,p2=pr_line,relation=	"line-point distance"}
-g4 = gr_spec.GeometricExpression{p1=pr_point,p2=pr_point,relation=	"line-point distance"}
-g5 = gr_spec.GeometricExpression{p1=pr_line,p2=pr_line,relation=	"distance from lines"}
-g6 = gr_spec.GeometricExpression{p1=pr_plane,p2=pr_line,relation=	"distance from lines"}
+g1 = gr_spec.GeometricExpression{p1=pr_point,p2=pr_point,expression=	"point-point distance"}
+g2 = gr_spec.GeometricExpression{p1=pr_point,p2=pr_line,expression=	"line-point distance"}
+g3 = gr_spec.GeometricExpression{p1=pr_line,p2=pr_line,expression=	"line-point distance"}
+g4 = gr_spec.GeometricExpression{p1=pr_point,p2=pr_point,expression=	"line-point distance"}
+g5 = gr_spec.GeometricExpression{p1=pr_line,p2=pr_line,expression=	"distance from lines"}
+g6 = gr_spec.GeometricExpression{p1=pr_plane,p2=pr_line,expression=	"distance from lines"}
 
---umf.check(g4,gr_spec.geometric_output_equation_spec,true)
+--umf.check(g4,gr_spec.geometric_output_expression_spec,true)
 
-j1 = gr_spec.JointExpression{joint_names={"j1"},relation="single_joint_value"}
-
-
+j1 = gr_spec.JointExpression{joint_names={"j1"},expression="single_joint_value"}
 
 
-print("======\n output_equation..\n==========")
+
+
+print("======\n output_expression..\n==========")
 
 umf.check(g1,gr_spec.ExpressionSpec{},true)
 print("======\n constraints..\n==========")
-umf.check(gr_spec.Constraint{output_equation=g2,behaviour="Velocity Limit"},gr_spec.constraint_spec,true)
+umf.check(gr_spec.Constraint{output_expression=g2,behaviour="Velocity Limit"},gr_spec.constraint_spec,true)
 print("======\n  1\n==========")
-umf.check(gr_spec.Constraint{output_equation=g3,behaviour="Velocity Limit"},gr_spec.constraint_spec,true)
+umf.check(gr_spec.Constraint{output_expression=g3,behaviour="Velocity Limit"},gr_spec.constraint_spec,true)
 print("======\n  2\n==========")
-umf.check(gr_spec.Constraint{output_equation=g4,behaviour="Velocity Limit"},gr_spec.constraint_spec,true)
+umf.check(gr_spec.Constraint{output_expression=g4,behaviour="Velocity Limit"},gr_spec.constraint_spec,true)
 print("======\n  3\n==========")
-umf.check(gr_spec.Constraint{output_equation=g5,behaviour="Velocity Limit"},gr_spec.constraint_spec,true)
+umf.check(gr_spec.Constraint{output_expression=g5,behaviour="Velocity Limit"},gr_spec.constraint_spec,true)
 print("======\n  4\n==========")
-umf.check(gr_spec.Constraint{output_equation=g6,behaviour="Velocity Limit"},gr_spec.constraint_spec,true)
+umf.check(gr_spec.Constraint{output_expression=g6,behaviour="Velocity Limit"},gr_spec.constraint_spec,true)
 print("======\n  5\n==========")
-umf.check(gr_spec.Constraint{output_equation=j1,behaviour="Velocity Limit"},gr_spec.constraint_spec,true)
+umf.check(gr_spec.Constraint{output_expression=j1,behaviour="Velocity Limit"},gr_spec.constraint_spec,true)
 print("======\n  6\n==========")
-c1=gr_spec.Constraint{output_equation=g1,behaviour="Velocity Limit"}
+c1=gr_spec.Constraint{output_expression=g1,behaviour="Velocity Limit"}
 umf.check(c1,gr_spec.constraint_spec,true)
 
 print("======\n  7\n==========")

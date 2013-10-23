@@ -13,8 +13,8 @@ Line=umf.class("Line")
 Versor=umf.class("Versor")
 Plane=umf.class("Plane")
 
---non ordered association btw relations and entities
-geometric_relation_entity_legal_association = { 
+--non ordered association btw expressions and entities
+geometric_expression_entity_legal_association = { 
 	["point-point distance"]		={Point,	Point},
  	["line-point distance"]			={Point,	Line},
  	["projection of point on line"]	={Point,	Line},
@@ -27,22 +27,22 @@ geometric_relation_entity_legal_association = {
  	["angles between planes"]		={Plane, 	Plane}
  	 }
 --building enum of type spec from index of previous table
-geometric_relation_type_spec = umf.EnumSpec{} 	
-for k ,v in pairs(geometric_relation_entity_legal_association) 
-	do table.insert(geometric_relation_type_spec,k) 
+geometric_expression_type_spec = umf.EnumSpec{} 	
+for k ,v in pairs(geometric_expression_entity_legal_association) 
+	do table.insert(geometric_expression_type_spec,k) 
 end 	
 
 
 function check_legal_pairs(obj)
-relation=obj.relation
-tab=geometric_relation_entity_legal_association
---print(relation)
---print(tab[relation])
-if (umf.instance_of(tab[relation][1] ,obj.p1.entity) 
-	and  umf.instance_of(tab[relation][2] ,obj.p2.entity))
+expression=obj.expression
+tab=geometric_expression_entity_legal_association
+--print(expression)
+--print(tab[expression])
+if (umf.instance_of(tab[expression][1] ,obj.p1.entity) 
+	and  umf.instance_of(tab[expression][2] ,obj.p2.entity))
 	or
-	 (umf.instance_of(tab[relation][2] ,obj.p1.entity) 
-	and  umf.instance_of(tab[relation][1] ,obj.p2.entity))
+	 (umf.instance_of(tab[expression][2] ,obj.p1.entity) 
+	and  umf.instance_of(tab[expression][1] ,obj.p2.entity))
 	then return true
 	else return false
 end
@@ -52,7 +52,7 @@ end
 
 
 
-joint_relation_type_spec = umf.EnumSpec{ 
+joint_expression_type_spec = umf.EnumSpec{ 
 	"single_joint_value" }
 
 
@@ -65,11 +65,7 @@ point_spec = umf.ObjectSpec{
   name='point',
   type=Point,
   sealed='both',
-  dict={
-      x=umf.NumberSpec{},
-      y=umf.NumberSpec{},
-      z=umf.NumberSpec{},
-  },
+  dict={x=umf.NumberSpec{}, y=umf.NumberSpec{}, z=umf.NumberSpec{}}
 }
 --versor
 function versor_unitary_mod_check (self, obj, vres)
@@ -88,29 +84,19 @@ versor_spec = umf.ObjectSpec{
   postcheck=versor_unitary_mod_check,
   type=Versor,
   sealed='both',
-  dict={
-      x=umf.NumberSpec{},
-      y=umf.NumberSpec{},
-      z=umf.NumberSpec{},
-  },
+   dict={x=umf.NumberSpec{}, y=umf.NumberSpec{}, z=umf.NumberSpec{}}
 }
 line_spec = umf.ObjectSpec{
   name='line',
   type=Line,
   sealed='both',
-  dict={
-       origin=point_spec,
-       direction=versor_spec,
-  },
+  dict={origin=point_spec, direction=versor_spec}
 }
 plane_spec = umf.ObjectSpec{
   name='plane',
   type=Plane,
   sealed='both',
-  dict={
-       origin=point_spec,
-       normal=versor_spec,
-  },
+  dict={origin=point_spec, normal=versor_spec}
 }
 function check_inheritance(obj,spec_table,vres)
 
@@ -174,22 +160,22 @@ primitive_spec = umf.ObjectSpec{
   sealed='both',
   dict={
 	entity=EntitySpec{},
-	base_frame=object_frame_spec
+	object_frame=object_frame_spec
   },
 }
 	
 
-function geometric_equation_type_check (self, obj, vres)
- 	umf.log("validating object against geometric_equation_type_check")
-	umf.add_msg(vres, "inf", obj.relation .. ", passed " 
+function geometric_entity_vs_expression_check (self, obj, vres)
+ 	umf.log("validating object against geometric_entity_vs_expression_check")
+	umf.add_msg(vres, "inf", obj.expression .. ", passed " 
    		.. tostring(obj.p1.entity:class()) 
    		.." and ".. tostring(obj.p2.entity:class()) )  	
    	
    	if not check_legal_pairs(obj)
-   	 then umf.add_msg(vres, "err", obj.relation .. " needs: "  
-   		.. tostring(geometric_relation_entity_legal_association[obj.relation][1]) 
+   	 then umf.add_msg(vres, "err", obj.expression .. " needs: "  
+   		.. tostring(geometric_expression_entity_legal_association[obj.expression][1]) 
    		.." and "
-   		.. tostring(geometric_relation_entity_legal_association[obj.relation][2] ))
+   		.. tostring(geometric_expression_entity_legal_association[obj.expression][2] ))
    		return false
    		else return true
    	end
@@ -200,13 +186,13 @@ end
 GeometricExpression=umf.class("GeometricExpression")
 geometric_expression_spec = umf.ObjectSpec{
   name='geometric_expression',
-  postcheck=geometric_equation_type_check,
+  postcheck=geometric_entity_vs_expression_check,
   type=GeometricExpression,
   sealed='both',
   dict={
 	p1=primitive_spec,	
 	p2=primitive_spec,
-	relation=geometric_relation_type_spec
+	expression=geometric_expression_type_spec
   },
 }
 string_array_spec = umf.TableSpec {
@@ -223,7 +209,7 @@ joint_expression_spec = umf.ObjectSpec{
   sealed='both',
   dict={
 	joint_names=string_array_spec,
-	relation=joint_relation_type_spec
+	expression=joint_expression_type_spec
   },
 }
 
@@ -231,7 +217,7 @@ ExpressionSpec = umf.class("ExpressionSpec", umf.Spec)
 
 -- Relation are Joint or geometrical
 
-relation_spec_table={
+expression_spec_table={
 	[JointExpression]=joint_expression_spec,
 	[GeometricExpression]=geometric_expression_spec,
 	}
@@ -249,11 +235,11 @@ function ExpressionSpec.check(self, obj, vres)
       umf.ind_dec()
       return false
    end
-   ret=check_inheritance (obj,relation_spec_table,vres)
+   ret=check_inheritance (obj,expression_spec_table,vres)
   
    if not ret
    then
-   		umf.add_msg(vres, "err", "Joint or Geometric relation, got:"..tostring(obj:class()))
+   		umf.add_msg(vres, "err", "Joint or Geometric expression, got:"..tostring(obj:class()))
     	ret=false
    end
    umf.ind_dec()--decrement an index, defined in umf.lua
@@ -273,18 +259,18 @@ behaviour_type_spec = umf.EnumSpec{}
 for k ,v in pairs(behaviour_spec_table) 
 	do table.insert(behaviour_type_spec,k) 
 end 	
-
+trj_gen_type_spec = umf.StringSpec{} 
 
 Constraint=umf.class("Constraint")
 constraint_spec = umf.ObjectSpec{
   name='constraint_spec',
-  --postcheck=joint_relation_type_check,
+  --postcheck=joint_expression_type_check,
   type=Constraint,
   sealed='both',
   dict={
-	output_equation=ExpressionSpec{},
+	output_expression=ExpressionSpec{},
 	behaviour=behaviour_type_spec,
-	tr_gen=umf.StringSpec{},
+	tr_gen=trj_gen_type_spec
   },
   optional={"tr_gen"}
 }
@@ -296,7 +282,7 @@ constraint_array_spec = umf.TableSpec {
 Task=umf.class("Task")
 task_spec = umf.ObjectSpec{
   name='task_spec',
-  --postcheck=joint_relation_type_check,
+  --postcheck=joint_expression_type_check,
   type=Task,
   sealed='both',
   dict={
