@@ -279,14 +279,64 @@ constraint_array_spec = umf.TableSpec {
    sealed='both',
    array={ constraint_spec }
 }
+----------monitor-------------
+monitored_variable_type_spec = umf.EnumSpec{"POS","FOR","VEL"} 
+comparison_type_spec = umf.EnumSpec{"EQUAL","LESS","MORE"} 
+
+Monitor=umf.class("Monitor")
+
+monitor_spec = umf.ObjectSpec{
+  name='monitor_spec',
+  type=Monitor,
+  sealed='both',
+  dict={
+	monitor_expression=ExpressionSpec{},
+	event_risen=umf.StringSpec{},
+	monitored_variable=monitored_variable_type_spec,
+	comparison_type=comparison_type_spec
+  },
+}
+
+
+-------------end monitor-------------
+
+-------------array spec -------------
+function not_empty_array(self, obj, vres) 
+if #obj<1 then umf.add_msg(vres, "err",  " needs non-empty array. It has size: ".. #obj )
+  	return false else return true end
+end
+
+monitor_array_spec = umf.TableSpec {
+   name='monitor_array_spec',
+   postcheck=not_empty_array,
+   sealed='both',
+   array={ monitor_spec }
+}
+
+constraint_array_spec = umf.TableSpec {
+   name='string_array_spec',
+   postcheck=not_empty_array,
+   sealed='both',
+   array={ constraint_spec }
+}
+-------------end array spec ---------
+
+
+--to be filled: 
+function task_type_check(self, obj, vres) return true end
+
 Task=umf.class("Task")
 task_spec = umf.ObjectSpec{
   name='task_spec',
-  --postcheck=joint_expression_type_check,
+  postcheck=task_type_check,
   type=Task,
   sealed='both',
   dict={
-	emer_cstr=constraint_array_spec
+	emergency_constraints=constraint_array_spec,
+	primary_constraints=constraint_array_spec,
+	auxiliary_constraints=constraint_array_spec,
+	monitors=monitor_array_spec
   },
+    optional={"emergency_constraints","auxiliary_constraints","monitors"}
 }
 

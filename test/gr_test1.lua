@@ -51,11 +51,15 @@ umf.check(gr_spec.Constraint{output_expression=j1,behaviour="Velocity Limit"},gr
 print("======\n  6\n==========")
 c1=gr_spec.Constraint{output_expression=g1,behaviour="Velocity Limit"}
 umf.check(c1,gr_spec.constraint_spec,true)
-
 print("======\n  7\n==========")
-
+M1=gr_spec.Monitor{monitor_expression=g1,
+	event_risen="done",
+	monitored_variable="POS",
+	comparison_type="EQUAL"
+}
+prim_c={c1}
 --i can pass empty table and pass the check, if precheck is not implemented
-T1=gr_spec.Task{emer_cstr={c1}}
+T1=gr_spec.Task{primary_constraints=prim_c,monitors={M1}}
 umf.check(T1,gr_spec.task_spec,true)
 
 
