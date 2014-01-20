@@ -1,10 +1,7 @@
-local gr_spec =require "gr_spec"
---local tostring 
-
-
+local gr_spec =require "geometric_relations_spec"
 
 point = gr_spec.Point{x=1,y=2,z=3}
-versor = gr_spec.Point{x=0,y=0,z=1}
+versor = gr_spec.Versor{x=0,y=0,z=1}
 
 line = gr_spec.Line{origin=gr_spec.Point{x=0,y=0,z=0},direction=gr_spec.Versor{x=1,y=0,z=0}}
 plane = gr_spec.Plane{origin=gr_spec.Point{x=0,y=0,z=0},normal=gr_spec.Versor{x=1,y=0,z=0}}
